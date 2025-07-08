@@ -36,8 +36,8 @@ Pada file `handleRequest()`, Anda bisa menambahkan konfigurasi spreadsheet di ba
 
 ```javascript
 const sheetConfigs = {
-  "macro": {
-    id: env.macro, // disesuaikan di Environment Variables di Cloudflare
+  "data": {
+    id: env.data, // disesuaikan di Environment Variables di Cloudflare
     gid: "0",      // GID sheet (bisa dilihat dari URL Spreadsheet)
     range: "A:Z",  // Kolom yang ingin diambil
     output: "json" // Bisa "json" atau "tsv"
