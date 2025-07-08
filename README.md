@@ -28,6 +28,34 @@ Cloudflare Worker ini digunakan untuk mengambil data dari **Google Spreadsheet**
    * ID diambil dari URL yang bentuknya seperti:
      `https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?...`
 
+### 🚀 Cara Deploy ke Cloudflare Workers
+
+#### 1. **Buat akun** di [Cloudflare](https://dash.cloudflare.com) (jika belum punya)
+
+#### 2. **Masuk ke dashboard Cloudflare**
+
+* Navigasi ke **Workers & Pages → Create Application**
+* Pilih **"Create Worker"**
+
+#### 3. **Tempelkan kode**
+
+* Hapus semua kode default
+* Tempelkan isi file `worker.js` atau `index.js` dari repositori ini
+
+#### 4. **Tambahkan Environment Variable**
+
+* Klik tab **Settings → Variables**
+* Tambahkan variabel baru:
+
+  | Name   | Value                             |
+  | ------ | --------------------------------- |
+  | `data` | `2PACX-1vTXiWabcDEFgHijKlm...XYZ` |
+
+#### 5. **Save dan Deploy**
+
+* Klik tombol **Save and Deploy**
+* Salin URL Worker yang diberikan (misalnya: `https://your-worker-url.workers.dev`)
+
 ---
 
 ### ⚙️ Konfigurasi Cloudflare Worker
