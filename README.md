@@ -168,8 +168,3 @@ Output JSON:
 MIT License — Bebas digunakan untuk keperluan pribadi maupun komersial.
 
 ---
-
-> 🚀 **Butuh API cepat dari Google Sheets ke JSON/TSV tanpa backend?**
-> Gunakan solusi ini via Cloudflare Workers — cepat, gratis, dan tanpa server!
-
----
