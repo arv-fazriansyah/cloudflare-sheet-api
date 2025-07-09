@@ -60,7 +60,7 @@ async function handleRequest(request, env) {
 // Fungsi untuk mengonversi TSV ke JSON
 function tsvToJson(tsv) {
     const lines = tsv.trim().split("\n");
-    const headers = lines[0].split("\t").map(header => header.trim().toUpperCase()); // Konversi header sekali saja
+    const headers = lines[0].split("\t").map(header => header.trim()); // Konversi header sekali saja
 
     return lines.slice(1).map(line => {
         const data = line.split("\t");
