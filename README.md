@@ -10,7 +10,7 @@ Worker ini digunakan untuk mengambil data dari **Google Spreadsheet yang dipubli
 
 * Mengambil data dari Google Spreadsheet publik
 * Output otomatis: **JSON** atau **TSV**
-* Filter data dengan parameter URL (contoh: `?NAMA=Andi`)
+* Filter data dengan parameter URL (contoh: `?nama=Andi`)
 * Cocok untuk kebutuhan:
 
   * API ringan
