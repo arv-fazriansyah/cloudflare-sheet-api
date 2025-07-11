@@ -1,120 +1,117 @@
 ---
 
-## 📄 Cloudflare Worker: Spreadsheet ke JSON/TSV dengan Query
+## 📄 Spreadsheet ke JSON / TSV API dengan Cloudflare Worker — Lengkap dengan Query Parameter
 
-Worker ini digunakan untuk mengambil data dari **Google Spreadsheet yang dipublikasikan**, lalu mengubahnya menjadi **JSON** atau **TSV**. Mendukung **filter via query string**.
+Buat **REST API ringan dari Google Spreadsheet** hanya dengan Cloudflare Worker. Script ini mengubah spreadsheet publik menjadi **data JSON atau TSV** yang dapat difilter dengan **parameter URL**.
 
 ---
 
 ### 🚀 Fitur Utama
 
-* Mengambil data dari Google Spreadsheet publik
-* Output otomatis: **JSON** atau **TSV**
-* Filter data dengan parameter URL (contoh: `?nama=Andi`)
-* Cocok untuk kebutuhan:
+✅ Mengubah **Google Spreadsheet publik** menjadi **API JSON atau TSV**
+✅ Mendukung **query parameter** seperti `?nama=Andi` untuk filter data
+✅ Output otomatis sesuai kebutuhan: **JSON** *(default)* atau **TSV**
+✅ Dapat digunakan untuk:
 
-  * API ringan
-  * Data publik
-  * Embed ke aplikasi frontend
+* Menyediakan data publik berbasis spreadsheet
+* Backend ringan tanpa server (serverless)
+* Aplikasi pendidikan, data sekolah, atau data statistik
+* Integrasi langsung ke frontend HTML, React, dsb.
 
 ---
 
-### 🧩 Setup Spreadsheet Google
+### 🔧 Cara Menggunakan Google Spreadsheet sebagai Sumber API
 
-1. **Buka** Google Spreadsheet yang ingin digunakan.
-2. Klik menu: **File → Bagikan → Publikasikan ke web**
+1. Buka Google Spreadsheet yang ingin digunakan
+2. Klik: **File → Bagikan → Publikasikan ke web**
 3. Pilih:
 
-   * **Publikasikan seluruh dokumen**
+   * **Seluruh dokumen**
    * Format: **Nilai dipisahkan tab (.tsv)**
-4. Klik **Mulai publikasi**
-5. Salin **ID spreadsheet** dari URL yang dipublikasikan:
+4. Klik **Mulai Publikasi**
+5. Salin **ID spreadsheet** dari URL, contoh:
 
-   Contoh URL:
+```
+https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?output=tsv
+```
 
-   ```
-   https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?output=tsv
-   ```
+ID Spreadsheet (contoh):
 
-   Contoh ID:
-
-   ```
-   2PACX-1vTXiWabcDEFgHijKlmno12345678pqRS9TUVXYZ
-   ```
+```
+2PACX-1vTXiWabcDEFgHijKlmno12345678pqRS9TUVXYZ
+```
 
 ---
 
-### ⚙️ Deploy ke Cloudflare Workers
+### ⚙️ Cara Deploy ke Cloudflare Worker
 
-#### 1. Buat Akun & Worker
+#### 1. Buat Worker di Cloudflare
 
-* Daftar/login ke [Cloudflare](https://dash.cloudflare.com)
-* Navigasi ke: **Workers & Pages → Create Application → Create Worker**
+* Masuk ke [Cloudflare Dashboard](https://dash.cloudflare.com)
+* Pilih: **Workers & Pages → Create Application → Create Worker**
 
-#### 2. Tempelkan Kode Worker
+#### 2. Tempelkan Script
 
-* Hapus kode default
-* Tempelkan isi dari file `worker.js` atau `index.js`
+* Hapus kode bawaan
+* Salin script dari `worker.js` atau `index.js`
 
 #### 3. Tambah Environment Variable
 
-* Masuk ke tab **Settings → Variables**
-* Tambahkan variabel:
+Masuk ke tab: **Settings → Variables**
 
-  | Name   | Value                             |
-  | ------ | --------------------------------- |
-  | `data` | `2PACX-1vTXiWabcDEFgHijKlm...XYZ` |
+| Nama   | Nilai (Value)                     |
+| ------ | --------------------------------- |
+| `data` | `2PACX-1vTXiWabcDEFgHijKlm...XYZ` |
 
-#### 4. Simpan dan Deploy
+#### 4. Deploy
 
 * Klik **Save and Deploy**
-* Salin URL Worker (misal: `https://your-worker-url.workers.dev`)
+* Salin URL akhir Worker, misal:
+  `https://your-worker-url.workers.dev`
 
 ---
 
-### 🔧 Konfigurasi Worker
+### ⚙️ Konfigurasi Kode Worker
 
-Edit bagian berikut pada fungsi `handleRequest()`:
+Ubah konfigurasi berikut:
 
 ```js
 const sheetConfigs = {
   data: {
-    id: env.data,   // ID spreadsheet dari env var
-    gid: "0",       // GID sheet (lihat dari URL Spreadsheet)
-    range: "A:Z",   // Range kolom yang diambil
+    id: env.data,   // ID spreadsheet
+    gid: "0",       // GID dari sheet (lihat di URL Google Sheets)
+    range: "A:Z",   // Kolom yang akan diambil
     output: "json"  // json atau tsv
   }
 };
 ```
 
-> 💡 Gunakan Environment Variables untuk menyimpan ID agar aman dan fleksibel.
-
 ---
 
-### 🔍 Contoh Penggunaan
+### 🔍 Contoh Penggunaan API
 
-#### 1. Ambil semua data:
+#### ✅ Ambil semua data:
 
 ```
 https://your-worker-url.workers.dev/data
 ```
 
-#### 2. Filter berdasarkan query (misal, nama):
+#### 🔎 Filter berdasarkan kolom (misal: nama):
 
 ```
 https://your-worker-url.workers.dev/data?nama=Andi
 ```
 
-#### 3. Output sebagai TSV:
+#### 📝 Output sebagai TSV:
 
-* Ubah `output: "tsv"` pada `sheetConfigs`
-* Maka respons akan berupa file `.tsv`
+* Ubah `output: "tsv"` pada konfigurasi
+* Maka hasil akan dalam format `.tsv`
 
 ---
 
-### 🧪 Contoh Struktur JSON Otomatis
+### 🧪 Contoh Hasil JSON Otomatis
 
-Misal isi spreadsheet:
+Spreadsheet:
 
 | NAMA | KELAS | JK |
 | ---- | ----- | -- |
@@ -126,7 +123,7 @@ Query:
 https://your-worker-url.workers.dev/data?nama=Andi
 ```
 
-Output JSON:
+Hasil:
 
 ```json
 [
@@ -138,13 +135,11 @@ Output JSON:
 ]
 ```
 
-Query lain:
+Query lain (multi hasil):
 
 ```
 https://your-worker-url.workers.dev/data?kelas=6A
 ```
-
-Output JSON:
 
 ```json
 [
@@ -165,6 +160,6 @@ Output JSON:
 
 ### 🛡️ Lisensi
 
-MIT License — Bebas digunakan untuk keperluan pribadi maupun komersial.
+Lisensi: **MIT** — Bebas digunakan untuk proyek pribadi, pendidikan, maupun komersial.
 
 ---
