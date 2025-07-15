@@ -1,8 +1,9 @@
-async function handleRequest(request, env) {
+// Fungsi utama untuk menangani request
+async function handleRequest(request, env) { 
     const url = new URL(request.url);
     const shortId = url.pathname.split("/")[1];
 
-    // Menentukan ID Spreadsheet beserta gid, range, dan output formatnya
+    // Konfigurasi spreadsheet dan range-nya
     const sheetConfigs = {
         "data": { id: env.data, gid: "0", range: "A:Z", output: "json" }
     };
@@ -12,17 +13,15 @@ async function handleRequest(request, env) {
 
     const { id: sheetId, gid, range, output } = sheetConfig;
 
-    // Membuat URL permintaan untuk mengakses data TSV dari Google Sheets (tersembunyi dari pengguna)
     const tsvUrl = `https://docs.google.com/spreadsheets/d/e/${sheetId}/pub?gid=${gid}&range=${range}&single=true&output=tsv`;
 
     try {
-        // Melakukan permintaan ke Google Sheets secara internal menggunakan Cloudflare IP
         const response = await fetch(tsvUrl, {
             method: 'GET',
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36', // Menyembunyikan permintaan asli
-                'Accept': 'text/tab-separated-values', // Menerima TSV
-                'Cache-Control': 'no-cache' // Menghindari cache
+                'User-Agent': 'Mozilla/5.0',
+                'Accept': 'text/tab-separated-values',
+                'Cache-Control': 'no-cache'
             }
         });
 
@@ -31,25 +30,19 @@ async function handleRequest(request, env) {
         const tsvText = await response.text();
         const jsonData = tsvToJson(tsvText);
 
-        // Mendapatkan parameter query dari URL
         const queryParams = url.searchParams;
-
-        // Jika tidak ada query parameter, kembalikan semua data
         let dataToReturn = jsonData;
 
-        // Filter data berdasarkan parameter query jika ada
         if (queryParams.toString()) {
             const filteredData = filterData(jsonData, queryParams);
             dataToReturn = filteredData.length ? filteredData : [{ message: "Data tidak ditemukan!" }];
         }
 
-        // Jika output = tsv, konversi data JSON ke TSV dan kirimkan sebagai file dengan ekstensi .tsv
         if (output === 'tsv') {
             const tsvOutput = jsonToTsv(dataToReturn);
-            return tsvResponse(tsvOutput, shortId);  // Menggunakan path untuk nama file
+            return tsvResponse(tsvOutput, shortId);
         }
 
-        // Jika output = json atau tidak ada output, kembalikan data dalam format JSON
         return jsonResponse(dataToReturn);
 
     } catch (error) {
@@ -57,44 +50,82 @@ async function handleRequest(request, env) {
     }
 }
 
-// Fungsi untuk mengonversi TSV ke JSON
+// ===========================
+// 🔧 UTILITAS
+// ===========================
+
+// Fungsi mengenali nilai khusus [arr] dan [obj]
+function parseSpecialValue(value) {
+    if (!value) return value;
+
+    if (value.startsWith("[arr]")) {
+        return value
+            .replace("[arr]", "")
+            .split(";")
+            .map(v => v.trim())
+            .filter(Boolean);
+    }
+
+    if (value.startsWith("[obj]")) {
+        const parts = value.replace("[obj]", "").split(";").map(v => v.trim());
+        const obj = {};
+        parts.forEach(part => {
+            const [key, val] = part.split(":").map(s => s.trim());
+            if (key && val !== undefined) obj[key] = val;
+        });
+        return obj;
+    }
+
+    return value.trim();
+}
+
+// Konversi TSV ke JSON
 function tsvToJson(tsv) {
     const lines = tsv.trim().split("\n");
-    const headers = lines[0].split("\t").map(header => header.trim()); // Konversi header sekali saja
+    const headers = lines[0].split("\t").map(header => header.trim());
 
     return lines.slice(1).map(line => {
         const data = line.split("\t");
         return headers.reduce((obj, header, index) => {
-            obj[header] = data[index]?.trim() || ""; // Trim data saat memasukkan
+            const rawValue = data[index]?.trim() || "";
+            obj[header] = parseSpecialValue(rawValue);
             return obj;
         }, {});
     });
 }
 
-// Fungsi untuk mengonversi JSON ke TSV
+// Konversi JSON ke TSV (array & obj akan dikonversi kembali ke string dengan tag)
 function jsonToTsv(data) {
     const headers = Object.keys(data[0]);
-    const tsv = [headers.join("\t")]; // Tambahkan header
+    const tsv = [headers.join("\t")];
 
     data.forEach(item => {
-        const row = headers.map(header => item[header] || ""); // Pastikan setiap kolom ada, jika kosong tambahkan string kosong
+        const row = headers.map(header => {
+            const val = item[header];
+            if (Array.isArray(val)) {
+                return `[arr] ${val.join("; ")}`;
+            } else if (typeof val === "object" && val !== null) {
+                return `[obj] ` + Object.entries(val).map(([k, v]) => `${k}: ${v}`).join("; ");
+            } else {
+                return val || "";
+            }
+        });
         tsv.push(row.join("\t"));
     });
 
     return tsv.join("\n");
 }
 
-// Fungsi untuk memfilter data berdasarkan query params
+// Filter berdasarkan query string (case sensitive, uppercase key)
 function filterData(data, queryParams) {
     const queryEntries = Array.from(queryParams.entries());
     return data.filter(item => queryEntries.every(([key, value]) => {
         const itemValue = item[key.toUpperCase()];
-        return itemValue && itemValue === value; // Membandingkan tanpa mengubah menjadi huruf kecil
+        return itemValue && itemValue === value;
     }));
 }
 
-
-// Fungsi untuk mengembalikan respons JSON
+// Respons JSON
 function jsonResponse(data, status = 200) {
     return new Response(JSON.stringify(data, null, 2), {
         status,
@@ -102,20 +133,19 @@ function jsonResponse(data, status = 200) {
     });
 }
 
-// Fungsi untuk mengembalikan respons TSV dengan ekstensi .tsv
+// Respons TSV file
 function tsvResponse(data, path, status = 200) {
-    const filename = `${path}.tsv`; // Nama file sesuai dengan path yang diminta
-
+    const filename = `${path}.tsv`;
     return new Response(data, {
         status,
         headers: {
             "Content-Type": "text/tab-separated-values",
-            "Content-Disposition": `attachment; filename=${filename}` // Menyimpan sebagai file dengan nama berdasarkan path
+            "Content-Disposition": `attachment; filename=${filename}`
         }
     });
 }
 
-// Fungsi default untuk menangani request di Cloudflare Worker
+// Default handler
 export default {
     async fetch(request, env) {
         return handleRequest(request, env);
