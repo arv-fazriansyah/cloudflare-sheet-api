@@ -32,7 +32,7 @@ async function handleRequest(request, env) {
   
     const sheetConfig = sheetConfigs[shortId];
     if (!sheetConfig) {
-      return jsonResponse([{ message: `Path '${shortId}' tidak valid.` }], 404);
+      return jsonResponse([{ message: `Path { ${shortId} } tidak valid.` }], 404);
     }
   
     // ❗Tolak jika sheet nonaktif dan tidak ada query
@@ -45,7 +45,7 @@ async function handleRequest(request, env) {
       const allowedSet = new Set(sheetConfig.allowedParams);
       const invalidParams = [...url.searchParams.keys()].filter(key => !allowedSet.has(key));
       if (invalidParams.length) {
-        return jsonResponse([{ message: `Parameter tidak diizinkan: ${invalidParams.join(", ")}` }], 400);
+        return jsonResponse([{ message: `Parameter { ${invalidParams.join(", ")} } tidak diizinkan.` }], 400);
       }
     }
   
@@ -85,7 +85,7 @@ async function handleRequest(request, env) {
       return jsonResponse(dataToReturn);
   
     } catch (error) {
-      return jsonResponse([{ message: "Error: " + error.message }], 500);
+      return jsonResponse([{ message: error.message }], 500);
     }
   }
   
