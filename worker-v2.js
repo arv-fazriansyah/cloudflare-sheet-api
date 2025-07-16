@@ -85,12 +85,14 @@ async function handleRequest(request, env) {
 // 🔎 Konversi response Google Sheets ke array of objects
 function parseSheetData(resText) {
   const jsonData = JSON.parse(resText.substring(47).slice(0, -2));
-  const cols = jsonData.table.cols.map(col => col.label || `COL${col.index}`);
+  const cols = jsonData.table.cols.map((col, i) => col.label?.trim() || null);
   const rows = jsonData.table.rows;
 
   return rows.map(row => {
     const obj = {};
     row.c.forEach((cell, i) => {
+      if (!cols[i]) return;
+
       let value = cell ? cell.v : "";
 
       // 👇 Parsing [arr] dan [obj]
@@ -107,7 +109,7 @@ function parseSheetData(resText) {
         }
       }
 
-      obj[cols[i] || `COL${i}`] = value;
+      obj[cols[i]] = value;
     });
     return obj;
   });
@@ -119,7 +121,7 @@ function filterData(data, queryParams) {
   return data.filter(item =>
     filters.every(([key, value]) => {
       const itemValue = item[key.toUpperCase()];
-      return itemValue !== undefined && String(itemValue).toLowerCase() === value.toLowerCase();
+      return itemValue !== undefined && String(itemValue) === value;
     })
   );
 }
