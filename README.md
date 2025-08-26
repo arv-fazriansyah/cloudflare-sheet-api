@@ -78,7 +78,7 @@ const sheetConfigs = {
     gid: "0",       // GID dari sheet (lihat di URL Google Sheets)
     range: "A:Z",   // Kolom yang akan diambil
     output: "json", // Format output default: json atau tsv
-    enabled: false, // Jika false → endpoint ini tidak aktif
+    enabled: false, // Jika false → endpoint ini tidak aktif hanya bisa di akses melalui parameter
 
     // 🔓 Hilangkan atau kosongkan ini agar semua query diizinkan
     // allowedParams: ["token", "id", "gid"]
