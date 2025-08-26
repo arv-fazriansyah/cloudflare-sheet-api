@@ -8,15 +8,15 @@ Buat **REST API ringan dari Google Spreadsheet** hanya dengan Cloudflare Worker.
 
 ### 🚀 Fitur Utama
 
-✅ Mengubah **Google Spreadsheet publik** menjadi **API JSON atau TSV**
-✅ Mendukung **query parameter** seperti `?nama=Andi` untuk filter data
-✅ Output otomatis sesuai kebutuhan: **JSON** *(default)* atau **TSV**
-✅ Dapat digunakan untuk:
+✅ Mengubah **Google Spreadsheet publik** menjadi **API JSON atau TSV**<br>
+✅ Mendukung **query parameter** seperti `?nama=Andi` untuk filter data<br>
+✅ Output otomatis sesuai kebutuhan: **JSON** *(default)* atau **TSV**<br>
+✅ Dapat digunakan untuk:<br>
 
-* Menyediakan data publik berbasis spreadsheet
-* Backend ringan tanpa server (serverless)
-* Aplikasi pendidikan, data sekolah, atau data statistik
-* Integrasi langsung ke frontend HTML, React, dsb.
+  * Menyediakan data publik berbasis spreadsheet
+  * Backend ringan tanpa server (serverless)
+  * Aplikasi pendidikan, data sekolah, atau data statistik
+  * Integrasi langsung ke frontend HTML, React, dsb.
 
 ---
 
