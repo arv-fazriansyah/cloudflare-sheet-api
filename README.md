@@ -9,11 +9,8 @@ Buat **REST API ringan dari Google Spreadsheet** hanya dengan Cloudflare Worker.
 ### 🚀 Fitur Utama
 
 ✅ Mengubah **Google Spreadsheet publik** menjadi **API JSON atau TSV**
-
 ✅ Mendukung **query parameter** seperti `?nama=Andi` untuk filter data
-
 ✅ Output otomatis sesuai kebutuhan: **JSON** *(default)* atau **TSV**
-
 ✅ Dapat digunakan untuk:
 
 * Menyediakan data publik berbasis spreadsheet
@@ -26,24 +23,22 @@ Buat **REST API ringan dari Google Spreadsheet** hanya dengan Cloudflare Worker.
 ### 🔧 Cara Menggunakan Google Spreadsheet sebagai Sumber API
 
 1. Buka Google Spreadsheet yang ingin digunakan
-2. Klik: **File → Bagikan → Publikasikan ke web**
-3. Pilih:
+2. Klik tombol **Bagikan** (kanan atas)
+3. Ubah setelan menjadi:
 
-   * **Seluruh dokumen**
-   * Format: **Nilai dipisahkan tab (.tsv)**
-4. Klik **Mulai Publikasi**
-5. Salin **ID spreadsheet** dari URL, contoh:
+   * **Siapa saja yang memiliki link**
+   * Akses: **Sebagai Pelihat**
+4. Salin **ID spreadsheet** dari URL, contoh:
 
 ```
-https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?output=tsv
+https://docs.google.com/spreadsheets/d/15j2EfsDVTBJ6xLlnCqi3Nn1R52FSCrHWp6G1FgXXxnE/edit?usp=sharing
 ```
 
 ID Spreadsheet (contoh):
 
 ```
-2PACX-1vTXiWabcDEFgHijKlmno12345678pqRS9TUVXYZ
+15j2EfsDVTBJ6xLlnCqi3Nn1R52FSCrHWp6G1FgXXxnE
 ```
-
 ---
 
 ### ⚙️ Cara Deploy ke Cloudflare Worker
@@ -56,15 +51,15 @@ ID Spreadsheet (contoh):
 #### 2. Tempelkan Script
 
 * Hapus kode bawaan
-* Salin script dari `worker.js` atau `index.js`
+* Salin script dari `worker.js`
 
 #### 3. Tambah Environment Variable
 
 Masuk ke tab: **Settings → Variables**
 
-| Nama   | Nilai (Value)                     |
-| ------ | --------------------------------- |
-| `data` | `2PACX-1vTXiWabcDEFgHijKlm...XYZ` |
+| Nama   | Nilai (Value)                                  |
+| ------ | ---------------------------------------------- |
+| `data` | `15j2EfsDVTBJ6xLlnCqi3Nn1R52FSCrHWp6G1FgXXxnE` |
 
 #### 4. Deploy
 
@@ -76,19 +71,20 @@ Masuk ke tab: **Settings → Variables**
 
 ### ⚙️ Konfigurasi Kode Worker
 
-Ubah konfigurasi berikut:
-
 ```js
 const sheetConfigs = {
-  data: {
-    id: env.data,   // ID spreadsheet
+  "data": {         // Ganti "data" sesuai kebutuhan untuk Endpoint Anda
+    id: env.data,   // ID spreadsheet (disimpan di Environment Variable)
     gid: "0",       // GID dari sheet (lihat di URL Google Sheets)
     range: "A:Z",   // Kolom yang akan diambil
-    output: "json"  // json atau tsv
+    output: "json", // Format output default: json atau tsv
+    enabled: false, // Jika false → endpoint ini tidak aktif
+
+    // 🔓 Hilangkan atau kosongkan ini agar semua query diizinkan
+    // allowedParams: ["token", "id", "gid"]
   }
 };
 ```
-
 ---
 
 ### 🔍 Contoh Penggunaan API
@@ -134,27 +130,6 @@ Hasil:
     "NAMA": "Andi",
     "KELAS": "6A",
     "JK": "L"
-  }
-]
-```
-
-Query lain (multi hasil):
-
-```
-https://your-worker-url.workers.dev/data?kelas=6A
-```
-
-```json
-[
-  {
-    "NAMA": "Andi",
-    "KELAS": "6A",
-    "JK": "L"
-  },
-  {
-    "NAMA": "Siska",
-    "KELAS": "6A",
-    "JK": "P"
   }
 ]
 ```
