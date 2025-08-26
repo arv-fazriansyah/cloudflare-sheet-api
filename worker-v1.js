@@ -50,7 +50,8 @@ async function handleRequest(request, env) {
     }
   
     const { id: sheetId, gid, range, output } = sheetConfig;
-    const tsvUrl = `https://docs.google.com/spreadsheets/d/e/${sheetId}/pub?gid=${gid}&range=${range}&single=true&output=tsv`;
+    //const tsvUrl = `https://docs.google.com/spreadsheets/d/e/${sheetId}/pub?gid=${gid}&range=${range}&single=true&output=tsv`; #error
+    const tsvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=tsv&gid=${gid}&range=${range}`;
   
     try {
       const response = await fetch(tsvUrl, {
